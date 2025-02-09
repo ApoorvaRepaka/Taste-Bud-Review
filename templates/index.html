@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taste Bud Review</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background: url('food-bg.jpg') center/cover no-repeat;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+/* Review box placed on the right side */
+        .container {
+            position: absolute;
+            top: 35%;
+            right: 5%;
+            transform: translateY(-50%);
+            width: 30%;
+            background: rgba(255, 193, 7, 0.9); /* Slight transparency for better visibility */
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        textarea {
+            width: 90%;
+            height: 250px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #8BC34A;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .video-container {
+            display: none;
+            position: absolute;
+            top: 30%;
+            right: 5%;
+            transform: translateY(-50%);
+            width: 30%;
+            height: 180px; /* Increase height as per your requirement */
+            background: rgba(255, 193, 7, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .video-container video {
+            width: 100%;
+            height: 250px; /* Adjust to fit within the container */
+            object-fit: cover; /* Ensures the video scales properly */
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="reviewBox">
+        <h2>Enter Your Taste</h2>
+        <textarea id="review" placeholder="Type your review here..." maxlength="500"></textarea>
+        <br>
+        <button onclick="submitReview()">Submit</button>
+    </div>    
+    <div class="video-container" id="videoBox">
+        <video id="resultVideo" autoplay loop muted></video>
+        <button class="back-button" onclick="goBack()">Back</button>
+    </div>
+    <script>
+    function submitReview() {
+        let reviewText = document.getElementById("review").value;
+        let reviewBox = document.getElementById("reviewBox");
+        let videoBox = document.getElementById("videoBox");
+        let videoElement = document.getElementById("resultVideo");
+        fetch("http://127.0.0.1:5000/predict", {  
+            method: "POST",  
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ review: reviewText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sentiment === "Positive") {
+                videoElement.src = "positive.mp4";
+            } 
+            else {
+                videoElement.src = "negative.mp4";
+            }   
+        videoElement.play(); // Auto play video
+        reviewBox.style.display = "none";
+        videoBox.style.display = "block";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Error fetching prediction. Check server logs.");
+        });
+    }
+    function goBack() {
+        document.getElementById("videoBox").style.display = "none";
+        document.getElementById("reviewBox").style.display = "block";
+        document.getElementById("review").value = ""; // Clears the review box
+    }
+    </script>
+</body>
+</html>
